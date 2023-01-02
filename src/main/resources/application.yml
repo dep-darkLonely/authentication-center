@@ -1,0 +1,31 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /
+
+logging:
+  level:
+    root: INFO
+
+mybatis-plus:
+  configuration:
+    call-setters-on-nulls: true
+  mapperLocations: classpath*:/mapper/**/*.xml
+
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/authentication_center
+    username: root
+    password: zHPaqz+tmbWFzi1h8Cff8pjZ4z+w7u2U+P5eeXAvDNBsWXTLKtCfO1xd3g==
+    type: com.alibaba.druid.pool.DruidDataSource
+    druid:
+      initial-size: 5
+      max-active: 10
+      max-wait: 1000
+      test-on-borrow: true
+      validation-query: SELECT 1 FROM DUAL
+      connect-timeout: 5000
+      active-connections:
+  messages:
+    basename: "i18n/message"
