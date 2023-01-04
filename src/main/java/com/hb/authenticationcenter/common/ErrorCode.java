@@ -33,4 +33,12 @@ public class ErrorCode {
      * Captcha Error.
      */
     public static final String ERROR_CAPTCHA_ERROR = "ERROR_CAPTCHA_ERROR";
+    /**
+     * Insufficient permissions.
+     */
+    public static final String ERROR_ACCESS_DENIED_ERROR = "ERROR_ACCESS_DENIED_ERROR";
+    /**
+     * Internal Server Error.
+     */
+    public static final String ERROR_SERVER_INTERNAL_ERROR = "ERROR_SERVER_INTERNAL_ERROR";
 }
