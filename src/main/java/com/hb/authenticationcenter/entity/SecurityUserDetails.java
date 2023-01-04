@@ -68,7 +68,7 @@ public class SecurityUserDetails implements UserDetails {
 
     @Override
     public boolean isAccountNonLocked() {
-        return this.sysUserEntity.isLocked();
+        return !this.sysUserEntity.isLocked();
     }
 
     /**

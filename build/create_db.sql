@@ -1,2 +1,112 @@
--- ----------------------------------------
--- ----------------------------------------
+-- --------------------------
+-- 	Authentication Center SQL
+-- --------------------------
+DROP DATABASE IF EXISTS `authentication_center`;
+CREATE DATABASE IF NOT EXISTS `authentication_center` DEFAULT CHARACTER SET UTF8MB4;
+USE `authentication_center`;
+-- --------------------------
+-- 	System User
+-- --------------------------
+CREATE TABLE `sys_user` (
+    `ID`            VARCHAR(64) NOT NULL  COMMENT '主键',
+    `USERNAME`      VARCHAR(64) NOT NULL  COMMENT '用户名',
+    `NAME`          VARCHAR(64) NOT NULL  COMMENT '名称',
+    `PASSWORD`      VARCHAR(256) NOT NULL  COMMENT '密码',
+    `STATUS`        BOOLEAN DEFAULT TRUE COMMENT '状态：启用/禁用',
+    `IS_LOCKED`     BOOLEAN DEFAULT FALSE COMMENT '锁定状态',
+    `TELEPHONE`     VARCHAR(32) DEFAULT NULL COMMENT '手机号',
+    `WECHAT_ID`     VARCHAR(64) DEFAULT NULL COMMENT '微信号',
+    `LOCKED_TIME`   TIMESTAMP NULL DEFAULT  NULL COMMENT '锁定时间',
+    `CLIENT_NAME`   VARCHAR(64) DEFAULT NULL COMMENT '客户端名称',
+    `REMARK`        VARCHAR(256)  DEFAULT NULL COMMENT '备注',
+    `CREATE_TIME`   TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `CREATE_BY`     VARCHAR(64) NOT NULL  COMMENT '创建人',
+    `UPDATE_TIME`   TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
+    `UPDATE_BY`     VARCHAR(64) NULL DEFAULT NULL COMMENT '修改人',
+    PRIMARY KEY (`ID`),
+    INDEX `INDEX_USERNAME` (`USERNAME` ASC) VISIBLE
+) ENGINE=INNODB DEFAULT CHARSET=UTF8MB4;
+-- --------------------------
+-- 	System Role
+-- --------------------------
+CREATE TABLE `sys_role` (
+    `ID`            VARCHAR(64) NOT NULL  COMMENT '主键',
+    `NAME`          VARCHAR(64) NOT NULL  COMMENT '名称',
+    `STATUS`        BOOLEAN DEFAULT TRUE COMMENT '状态：启用/禁用',
+    `BUILT_IN`      BOOLEAN DEFAULT FALSE COMMENT '内置角色',
+    `REMARK`        VARCHAR(256)  DEFAULT NULL COMMENT '备注',
+    `CREATE_TIME`   TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `CREATE_BY`     VARCHAR(64) NOT NULL  COMMENT '创建人',
+    `UPDATE_TIME`   TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
+    `UPDATE_BY`     VARCHAR(64) NULL DEFAULT NULL COMMENT '修改人',
+    PRIMARY KEY (`ID`)
+) ENGINE=INNODB DEFAULT CHARSET=UTF8MB4;
+-- --------------------------
+-- 	System Authority
+-- --------------------------
+CREATE TABLE `sys_authority`(
+    `ID`             VARCHAR(64) NOT NULL  COMMENT '主键',
+    `NAME`           VARCHAR(64) NOT NULL  COMMENT '名称',
+    `IDENTIFICATION` VARCHAR(64) NOT NULL  COMMENT '权限标识',
+    `REMARK`         VARCHAR(256)  DEFAULT NULL COMMENT '备注',
+    `CREATE_TIME`    TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `CREATE_BY`      VARCHAR(64) NOT NULL  COMMENT '创建人',
+    `UPDATE_TIME`    TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
+    `UPDATE_BY`      VARCHAR(64) NULL DEFAULT NULL COMMENT '修改人',
+    PRIMARY KEY (`ID`),
+    INDEX `INDEX_AUTHORITY_ID` (`NAME` ASC) VISIBLE
+) ENGINE=INNODB DEFAULT CHARSET=UTF8MB4;
+-- --------------------------
+-- 	Rel Role Authority
+-- --------------------------
+CREATE TABLE `rel_role_authority`(
+     `ROLE_ID`             VARCHAR(64) NOT NULL  COMMENT '角色ID',
+     `AUTHORITY_ID`        VARCHAR(64) NOT NULL  COMMENT '权限ID',
+     INDEX `INDEX_ROLE_ID` (`ROLE_ID` ASC) VISIBLE,
+     INDEX `INDEX_AUTHORITY_ID` (`AUTHORITY_ID` ASC) VISIBLE
+) ENGINE=INNODB DEFAULT CHARSET=UTF8MB4;
+-- --------------------------
+-- 	Rel User Role
+-- --------------------------
+CREATE TABLE `rel_user_role` (
+    `ID`             VARCHAR(64) NOT NULL  COMMENT '用户ID',
+    `ROLE_ID`        VARCHAR(64) NOT NULL  COMMENT '角色ID',
+    INDEX `INDEX_USER_ID` (`ID` ASC) VISIBLE,
+    INDEX `INDEX_ROLE_ID` (`ROLE_ID` ASC) VISIBLE
+) ENGINE=INNODB DEFAULT CHARSET=UTF8MB4;
+-- --------------------------
+-- 	System Role Authority View
+-- --------------------------
+CREATE VIEW `sys_role_authority_view` AS
+SELECT DISTINCT
+    SR.`ID`                 AS `ID`,
+    SR.`NAME`               AS `NAME`,
+    SR.`STATUS`             AS `STATUS`,
+    SR.`REMARK`             AS `REMARK`,
+    SA.`NAME`               AS `AUTHORITY`,
+    SA.`IDENTIFICATION`     AS `IDENTIFICATION`
+    FROM sys_role AS SR
+    LEFT JOIN rel_role_authority AS RRA ON RRA.ROLE_ID = SR.ID
+    LEFT JOIN sys_authority AS SA ON RRA.AUTHORITY_ID = SA.ID;
+-- --------------------------
+-- Preset User Data
+-- --------------------------
+INSERT INTO `sys_role` (`ID`, `NAME`, `STATUS`, `BUILT_IN`, `CREATE_BY`) VALUES
+    ('00000000-0000-0000-0000-000000000001', '管理员角色', true, true, '00000000-0000-0000-0000-000000000001');
+
+INSERT INTO `sys_authority` (`ID`, `NAME`, `IDENTIFICATION`, `CREATE_BY`) VALUES
+    ('00000000-0000-0000-0000-000000000001', '用户添加', 'sys:user:add', '00000000-0000-0000-0000-000000000001'),
+    ('00000000-0000-0000-0000-000000000002', '用户查询', 'sys:user:search', '00000000-0000-0000-0000-000000000001'),
+    ('00000000-0000-0000-0000-000000000003', '用户删除', 'sys:user:delete', '00000000-0000-0000-0000-000000000001');
+
+INSERT INTO `rel_role_authority` (`ROLE_ID`, `AUTHORITY_ID`) VALUES
+    ('00000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000001'),
+    ('00000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000002'),
+    ('00000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000003');
+
+INSERT INTO `sys_user` (`ID`, `USERNAME`, `NAME`, `PASSWORD`, `STATUS`, `IS_LOCKED`, `TELEPHONE`, `CLIENT_NAME`, `CREATE_BY`) VALUES
+    ('00000000-0000-0000-0000-000000000001', 'admin', '系统管理员', '745a885083d1b6fb2d627c140394674c7256b3a7e63952984d89b56fb394a587728c9c9802c75a82',
+     true, false, '', 'DSK-1021', '00000000-0000-0000-0000-000000000001');
+
+INSERT INTO `rel_user_role` (`ID`, `ROLE_ID`) VALUES
+      ('00000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000001');

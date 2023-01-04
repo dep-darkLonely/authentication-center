@@ -22,8 +22,8 @@
             SRAV.`REMARK` AS `REMARK`,
             SRAV.`AUTHORITY` AS `AUTHORITY`,
             SRAV.`IDENTIFICATION` AS `IDENTIFICATION`
-        FROM REL_USER_ROLE AS RUR
-        LEFT JOIN SYS_ROLE_AUTHORITY_VIEW AS SRAV ON SRAV.`ID` = RUR.`ROLE_ID`
+        FROM rel_user_role AS RUR
+        LEFT JOIN sys_role_authority_view AS SRAV ON SRAV.`ID` = RUR.`ROLE_ID`
         WHERE RUR.`ID` = #{uId};
     </select>
 </mapper>

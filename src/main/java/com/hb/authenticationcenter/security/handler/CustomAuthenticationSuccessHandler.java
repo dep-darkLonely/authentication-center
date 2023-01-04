@@ -1,7 +1,6 @@
 package com.hb.authenticationcenter.security.handler;
 
 import com.hb.authenticationcenter.common.ResponseResult;
-import com.hb.authenticationcenter.controller.response.DefaultView;
 import com.hb.authenticationcenter.controller.response.RoleResponse;
 import com.hb.authenticationcenter.controller.response.SimpleView;
 import com.hb.authenticationcenter.controller.response.UserResponse;

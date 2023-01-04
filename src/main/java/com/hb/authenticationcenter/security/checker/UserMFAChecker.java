@@ -1,7 +1,6 @@
 package com.hb.authenticationcenter.security.checker;
 
 import com.hb.authenticationcenter.controller.request.LoginRequest;
-import com.hb.authenticationcenter.security.checker.PreAuthenticationChecker;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
