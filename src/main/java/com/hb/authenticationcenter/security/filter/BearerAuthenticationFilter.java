@@ -1,5 +1,8 @@
 package com.hb.authenticationcenter.security.filter;
 
+import com.hb.authenticationcenter.security.context.UserContextHolder;
+import com.hb.authenticationcenter.security.context.UserContextHolderStrategy;
+import com.hb.authenticationcenter.security.convert.AuthenticationConvert;
 import com.hb.authenticationcenter.security.exception.InvalidTokenException;
 import com.hb.authenticationcenter.security.httpconverter.BearerAuthenticationConverter;
 import com.hb.authenticationcenter.security.token.JweAuthenticationToken;
@@ -10,7 +13,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.core.log.LogMessage;
 import org.springframework.security.authentication.AuthenticationDetailsSource;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContext;
@@ -38,6 +40,8 @@ public class BearerAuthenticationFilter extends OncePerRequestFilter {
 
     private SecurityContextHolderStrategy securityContextHolderStrategy = SecurityContextHolder
             .getContextHolderStrategy();
+
+    private UserContextHolderStrategy userContextHolderStrategy = UserContextHolder.getUserContextHolderStrategy();
 
     private final AuthenticationEntryPoint authenticationEntryPoint;
 
@@ -106,6 +110,7 @@ public class BearerAuthenticationFilter extends OncePerRequestFilter {
             }
             this.rememberMeServices.loginSuccess(request, response, authResult);
             this.securityContextRepository.saveContext(context, request, response);
+            this.userContextHolderStrategy.setContext(AuthenticationConvert.convert(request, authResult));
             onSuccessfulAuthentication(request, response, authResult);
         }
         catch (AuthenticationException ex) {
@@ -114,9 +119,11 @@ public class BearerAuthenticationFilter extends OncePerRequestFilter {
             this.rememberMeServices.loginFail(request, response);
             onUnsuccessfulAuthentication(request, response, ex);
             this.authenticationEntryPoint.commence(request, response, ex);
+            this.userContextHolderStrategy.clearContext();
             return;
         }
         chain.doFilter(request, response);
+        this.userContextHolderStrategy.clearContext();
     }
 
     protected void onSuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response,
@@ -162,4 +169,11 @@ public class BearerAuthenticationFilter extends OncePerRequestFilter {
         return this.credentialsCharset;
     }
 
+    /**
+     * set user context holder strategy.
+     * @param userContextHolderStrategy user context holder strategy
+     */
+    public void setUserContextHolderStrategy(UserContextHolderStrategy userContextHolderStrategy) {
+        this.userContextHolderStrategy = userContextHolderStrategy;
+    }
 }

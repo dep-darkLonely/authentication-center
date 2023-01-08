@@ -1,15 +1,15 @@
 package com.hb.authenticationcenter.security.handler;
 
 import com.hb.authenticationcenter.common.ResponseResult;
-import com.hb.authenticationcenter.controller.response.RoleResponse;
 import com.hb.authenticationcenter.controller.response.SimpleView;
 import com.hb.authenticationcenter.controller.response.UserResponse;
-import com.hb.authenticationcenter.entity.RoleAuthorityEntity;
 import com.hb.authenticationcenter.entity.SecurityUserDetails;
 import com.hb.authenticationcenter.entity.TokenWhiteListEntity;
 import com.hb.authenticationcenter.entity.UserEntity;
 import com.hb.authenticationcenter.security.config.LoginConfig;
-import com.hb.authenticationcenter.security.convert.Convert;
+import com.hb.authenticationcenter.security.context.CurrentUser;
+import com.hb.authenticationcenter.security.context.UserContextHolder;
+import com.hb.authenticationcenter.security.context.UserContextHolderStrategy;
 import com.hb.authenticationcenter.security.token.persistent.PersistentTokenRepository;
 import com.hb.authenticationcenter.util.JsonUtils;
 import com.hb.authenticationcenter.util.JweUtils;
@@ -18,7 +18,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
@@ -26,8 +25,6 @@ import org.springframework.util.Assert;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Date;
-import java.util.Optional;
-import java.util.Set;
 
 import static com.hb.authenticationcenter.common.Constants.DEFAULT_CHARSET;
 import static jakarta.servlet.http.HttpServletResponse.SC_OK;
@@ -43,6 +40,8 @@ import static org.pac4j.core.context.HttpConstants.BEARER_HEADER_PREFIX;
 @Component
 public class CustomAuthenticationSuccessHandler implements AuthenticationSuccessHandler {
 
+    private final UserContextHolderStrategy userContextHolderStrategy = UserContextHolder.getUserContextHolderStrategy();
+
     private final PersistentTokenRepository tokenRepository;
 
     private final LoginConfig config;
@@ -57,7 +56,7 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication)
             throws IOException, ServletException {
         SecurityUserDetails userDetails = (SecurityUserDetails) authentication.getPrincipal();
-        long time = System.currentTimeMillis() + config.getTokenExpireTime();
+        long time = config.generateTokenExpireTime();
         String token = JweUtils.createToken(userDetails, time);
         UserResponse userResponse = buildUserResponse(userDetails);
         userResponse.setToken(token);
@@ -96,18 +95,15 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
      */
     private UserResponse buildUserResponse(SecurityUserDetails userDetails) {
         Assert.notNull(userDetails, "userDetails can not null");
-        Convert<GrantedAuthority, String> authorityStringConvert = userDetails::getAuthorities;
-        Set<String> permissions = authorityStringConvert.convert(GrantedAuthority::getAuthority);
-        Convert<RoleAuthorityEntity, RoleResponse> entity2RespConvert = userDetails::getRoles;
-        Set<RoleResponse> roles = entity2RespConvert.convert(RoleAuthorityEntity::entity2Response);
         UserEntity userEntity = userDetails.getUserEntity();
+        CurrentUser context = this.userContextHolderStrategy.getContext();
         return UserResponse.builder()
                 .id(userEntity.getId())
                 .username(userEntity.getUsername())
                 .name(userEntity.getName())
                 .clientName(userEntity.getClientName())
-                .permissions(permissions)
-                .roles(roles)
+                .permissions(context.getPermissions())
+                .roles(context.getRoles())
                 .build();
     }
 }

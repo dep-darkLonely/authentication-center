@@ -56,7 +56,10 @@ public class JweAuthenticationProvider implements AuthenticationProvider {
         }
         // get the stored token from the database first.
         TokenWhiteListEntity tokenEntity = Optional.ofNullable(persistentTokenRepository.getTokenEntity(token))
-                .orElse(this.resolveRequestToken(token));
+                .orElseThrow(() -> {
+                    log.error("invalid token.");
+                    throw new InvalidTokenException("invalid token.");
+                });
         if (tokenEntity.getDate().getTime() < System.currentTimeMillis()) {
             log.error("token already expired.");
             throw new CredentialsExpiredException("token already expired.");
@@ -65,7 +68,7 @@ public class JweAuthenticationProvider implements AuthenticationProvider {
         try {
             UserDetails userDetails = userService.loadUserByUsername(tokenEntity.getUsername());
             this.authenticationCheck.check(userDetails);
-            return createSuccessAuthentication(userDetails.getUsername(), userDetails);
+            return createSuccessAuthentication(userDetails);
         } catch (UsernameNotFoundException ex) {
             log.error("username={} user not found.", tokenEntity.getUsername());
             throw new UserNotFoundException("user not found.");
@@ -77,10 +80,10 @@ public class JweAuthenticationProvider implements AuthenticationProvider {
         return (JweAuthenticationToken.class.isAssignableFrom(authentication));
     }
 
-    protected Authentication createSuccessAuthentication(Object principal, UserDetails user) {
-        UsernamePasswordAuthenticationToken result = UsernamePasswordAuthenticationToken.authenticated(principal,
+    protected Authentication createSuccessAuthentication(UserDetails user) {
+        UsernamePasswordAuthenticationToken result = UsernamePasswordAuthenticationToken.authenticated(user,
                 null, this.authoritiesMapper.mapAuthorities(user.getAuthorities()));
-        result.setDetails(null);
+        result.setDetails(user);
         return result;
     }
 

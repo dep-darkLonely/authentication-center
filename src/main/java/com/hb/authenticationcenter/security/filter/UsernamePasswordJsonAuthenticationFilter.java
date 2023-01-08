@@ -2,7 +2,12 @@ package com.hb.authenticationcenter.security.filter;
 
 import com.hb.authenticationcenter.controller.request.LoginRequest;
 import com.hb.authenticationcenter.security.checker.PreAuthenticationChecker;
+import com.hb.authenticationcenter.security.context.UserContextHolder;
+import com.hb.authenticationcenter.security.context.UserContextHolderStrategy;
+import com.hb.authenticationcenter.security.convert.AuthenticationConvert;
 import com.hb.authenticationcenter.util.JsonUtils;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.Setter;
@@ -34,6 +39,8 @@ public class UsernamePasswordJsonAuthenticationFilter extends AbstractAuthentica
     private static final AntPathRequestMatcher DEFAULT_ANT_PATH_REQUEST_MATCHER = new AntPathRequestMatcher(LOGIN_URL,
             "POST");
     private boolean postOnly = true;
+
+    private UserContextHolderStrategy userContextHolderStrategy = UserContextHolder.getUserContextHolderStrategy();
 
     @Setter
     private List<PreAuthenticationChecker> preAuthenticationCheckers;
@@ -69,6 +76,24 @@ public class UsernamePasswordJsonAuthenticationFilter extends AbstractAuthentica
         setDetails(request, authRequest);
         preAuthenticationCheck(loginRequest);
         return this.getAuthenticationManager().authenticate(authRequest);
+    }
+
+    @Override
+    protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authResult) throws IOException, ServletException {
+        this.userContextHolderStrategy.setContext(AuthenticationConvert.convert(request, authResult));
+        super.successfulAuthentication(request, response, chain, authResult);
+    }
+
+    /**
+     * After authentication fails, clear the content of user context.
+     */
+    @Override
+    protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) throws IOException, ServletException {
+        try {
+            super.unsuccessfulAuthentication(request, response, failed);
+        } finally {
+            this.userContextHolderStrategy.clearContext();
+        }
     }
 
     /**

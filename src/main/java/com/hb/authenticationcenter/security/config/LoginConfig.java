@@ -21,4 +21,12 @@ public class LoginConfig {
 
     @Value("${user.login.token-expire-time: 3600}")
     private Integer tokenExpireTime;
+
+    /**
+     * generate token expire time.
+     * @return expire time
+     */
+    public long generateTokenExpireTime() {
+        return System.currentTimeMillis() + this.tokenExpireTime * 1000L;
+    }
 }
