@@ -1,7 +1,5 @@
 package com.hb.authenticationcenter.common;
 
-import org.bouncycastle.pqc.crypto.newhope.NHSecretKeyProcessor;
-
 /**
  * @author admin
  * @version 1.0
@@ -41,4 +39,8 @@ public class ErrorCode {
      * Internal Server Error.
      */
     public static final String ERROR_SERVER_INTERNAL_ERROR = "ERROR_SERVER_INTERNAL_ERROR";
+    /**
+     * Create Token failed.
+     */
+    public static final String ERROR_CREATE_TOKEN_FAILED_ERROR = "ERROR_CREATE_TOKEN_FAILED_ERROR";
 }

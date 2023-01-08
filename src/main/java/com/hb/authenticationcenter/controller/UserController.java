@@ -5,13 +5,11 @@ import com.hb.authenticationcenter.common.ResponseResult;
 import com.hb.authenticationcenter.controller.response.DefaultView;
 import com.hb.authenticationcenter.entity.SecurityUserDetails;
 import com.hb.authenticationcenter.security.authority.Authority;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -33,6 +31,6 @@ public class UserController extends AbstractController {
         SecurityContext context = SecurityContextHolder.getContext();
         Authentication authentication = context.getAuthentication();
         SecurityUserDetails details = (SecurityUserDetails) authentication.getCredentials();
-        return ResponseEntity.ok(ResponseResult.success(details.getSysUserEntity()));
+        return ResponseEntity.ok(ResponseResult.success(details.getUserEntity()));
     }
 }

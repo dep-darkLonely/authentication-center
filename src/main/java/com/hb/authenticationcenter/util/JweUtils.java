@@ -2,7 +2,7 @@ package com.hb.authenticationcenter.util;
 
 import com.hb.authenticationcenter.controller.response.UserResponse;
 import com.hb.authenticationcenter.entity.SecurityUserDetails;
-import com.hb.authenticationcenter.entity.SysUserEntity;
+import com.hb.authenticationcenter.entity.UserEntity;
 import com.nimbusds.jose.EncryptionMethod;
 import com.nimbusds.jose.JWEAlgorithm;
 import com.nimbusds.jose.JWSAlgorithm;
@@ -53,16 +53,16 @@ public class JweUtils {
         JWT_AUTHENTICATOR.setEncryptionConfiguration(encryptionConfiguration);
     }
     public static String createToken(SecurityUserDetails userDetails, long expireTime) {
-        Assert.notNull(userDetails.getSysUserEntity(), "id can not blank.");
+        Assert.notNull(userDetails.getUserEntity(), "id can not blank.");
         JwtGenerator generator = new JwtGenerator();
         generator.setEncryptionConfiguration(encryptionConfiguration);
         generator.setSignatureConfiguration(signatureConfiguration);
         generator.setExpirationTime(new Date(expireTime));
         CommonProfile userProfile = new CommonProfile();
-        SysUserEntity sysUserEntity = userDetails.getSysUserEntity();
-        userProfile.setId(sysUserEntity.getId());
-        userProfile.setClientName(sysUserEntity.getClientName());
-        userProfile.addAttribute("username", sysUserEntity.getUsername());
+        UserEntity userEntity = userDetails.getUserEntity();
+        userProfile.setId(userEntity.getId());
+        userProfile.setClientName(userEntity.getClientName());
+        userProfile.addAttribute("username", userEntity.getUsername());
         return generator.generate(userProfile);
     }
 

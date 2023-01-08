@@ -1,11 +1,11 @@
 package com.hb.authenticationcenter.service;
 
 import com.baomidou.mybatisplus.extension.conditions.query.QueryChainWrapper;
-import com.hb.authenticationcenter.dao.SysRoleDao;
-import com.hb.authenticationcenter.dao.SysUserDao;
+import com.hb.authenticationcenter.dao.RoleDao;
+import com.hb.authenticationcenter.dao.UserDao;
 import com.hb.authenticationcenter.entity.RoleAuthorityEntity;
 import com.hb.authenticationcenter.entity.SecurityUserDetails;
-import com.hb.authenticationcenter.entity.SysUserEntity;
+import com.hb.authenticationcenter.entity.UserEntity;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -27,26 +27,26 @@ import static com.hb.authenticationcenter.common.Constants.LIMIT_1_SQL_SEGAMENT;
 @Service
 @Transactional(readOnly = true, rollbackFor = RuntimeException.class)
 public class CustomUserDetailServiceImpl implements UserDetailsService {
-    private final SysUserDao userDao;
-    private final SysRoleDao sysRoleDao;
+    private final UserDao userDao;
+    private final RoleDao roleDao;
 
-    public CustomUserDetailServiceImpl(SysUserDao userDao, SysRoleDao sysRoleDao) {
+    public CustomUserDetailServiceImpl(UserDao userDao, RoleDao roleDao) {
         this.userDao = userDao;
-        this.sysRoleDao = sysRoleDao;
+        this.roleDao = roleDao;
     }
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        SysUserEntity sysUserEntity = new QueryChainWrapper<>(userDao.getBaseMapper())
+        UserEntity userEntity = new QueryChainWrapper<>(userDao.getBaseMapper())
                 .eq("username", username)
                 .last(LIMIT_1_SQL_SEGAMENT)
                 .list()
                 .stream()
                 .findFirst()
                 .orElseThrow(() -> {throw new UsernameNotFoundException("user not exist.username=" + username);});
-        Set<RoleAuthorityEntity> roles = sysRoleDao.getRolesByUserId(sysUserEntity.getId());
+        Set<RoleAuthorityEntity> roles = roleDao.getRolesByUserId(userEntity.getId());
         SecurityUserDetails securityUserDetails = new SecurityUserDetails();
-        securityUserDetails.setSysUserEntity(sysUserEntity);
+        securityUserDetails.setUserEntity(userEntity);
         securityUserDetails.setRoles(roles);
         return securityUserDetails;
     }

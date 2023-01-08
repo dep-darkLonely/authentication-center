@@ -16,6 +16,5 @@ public class UserMFAChecker implements PreAuthenticationChecker {
 
     @Override
     public void check(LoginRequest loginRequest) {
-        System.out.println("mfa check");
     }
 }

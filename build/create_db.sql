@@ -89,6 +89,19 @@ SELECT DISTINCT
     LEFT JOIN rel_role_authority AS RRA ON RRA.ROLE_ID = SR.ID
     LEFT JOIN sys_authority AS SA ON RRA.AUTHORITY_ID = SA.ID;
 -- --------------------------
+-- 	Token White List
+-- --------------------------
+CREATE TABLE `sys_token_white_list` (
+    `ID` VARCHAR(64) NOT NULL COMMENT '主键ID',
+    `USERNAME` VARCHAR(64) NOT NULL COMMENT '用户名',
+    `TOKEN` NVARCHAR(1024) NOT NULL COMMENT 'token',
+    `DATE` DATETIME NOT NULL COMMENT 'token创建时间',
+    PRIMARY KEY (`ID`),
+    INDEX `INDEX_USERNAME` (`USERNAME` ASC ) VISIBLE ,
+    INDEX `INDEX_TOKEN` (`TOKEN` ASC ) VISIBLE ,
+    INDEX `INDEX_DATE` (`DATE` DESC ) VISIBLE
+) ENGINE=INNODB DEFAULT CHARSET=UTF8MB4 COMMENT 'token白名单';
+-- --------------------------
 -- Preset User Data
 -- --------------------------
 INSERT INTO `sys_role` (`ID`, `NAME`, `STATUS`, `BUILT_IN`, `CREATE_BY`) VALUES

@@ -4,7 +4,6 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
@@ -23,7 +22,7 @@ import java.util.Set;
 @Accessors(chain = true)
 public class SecurityUserDetails implements UserDetails {
 
-    private SysUserEntity sysUserEntity;
+    private UserEntity userEntity;
 
     private boolean accountExpired;
 
@@ -32,7 +31,7 @@ public class SecurityUserDetails implements UserDetails {
     private Set<RoleAuthorityEntity> roles;
 
     @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
+    public Collection<GrantedAuthority> getAuthorities() {
         Set<GrantedAuthority> authoritySet = new HashSet<>();
         Optional.ofNullable(this.roles).ifPresent(
             elements -> {
@@ -49,12 +48,12 @@ public class SecurityUserDetails implements UserDetails {
 
     @Override
     public String getPassword() {
-        return this.sysUserEntity.getPassword();
+        return this.userEntity.getPassword();
     }
 
     @Override
     public String getUsername() {
-        return this.sysUserEntity.getUsername();
+        return this.userEntity.getUsername();
     }
 
     /**
@@ -68,7 +67,7 @@ public class SecurityUserDetails implements UserDetails {
 
     @Override
     public boolean isAccountNonLocked() {
-        return !this.sysUserEntity.isLocked();
+        return !this.userEntity.isLocked();
     }
 
     /**
@@ -82,6 +81,6 @@ public class SecurityUserDetails implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return this.sysUserEntity.isStatus();
+        return this.userEntity.isStatus();
     }
 }

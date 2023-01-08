@@ -1,7 +1,6 @@
 package com.hb.authenticationcenter.common;
 
 import com.fasterxml.jackson.annotation.JsonView;
-import com.hb.authenticationcenter.controller.response.DefaultView;
 import com.hb.authenticationcenter.controller.response.SimpleView;
 import lombok.Data;
 

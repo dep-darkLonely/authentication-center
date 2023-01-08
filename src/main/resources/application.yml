@@ -28,4 +28,13 @@ spring:
       connect-timeout: 5000
       active-connections:
   messages:
-    basename: "i18n/message"
+    basename: i18n/message
+
+
+# user loin config
+user:
+  login:
+    # multi site login
+    multiple-logins: false
+    # token: second
+    token-expire-time: 3600

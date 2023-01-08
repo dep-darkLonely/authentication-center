@@ -6,6 +6,7 @@ import com.hb.authenticationcenter.security.filter.BearerAuthenticationFilter;
 import com.hb.authenticationcenter.security.filter.UsernamePasswordJsonAuthenticationFilter;
 import com.hb.authenticationcenter.security.matcher.CustomCsrfMatcher;
 import com.hb.authenticationcenter.security.provider.JweAuthenticationProvider;
+import com.hb.authenticationcenter.security.token.persistent.PersistentTokenRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -50,6 +51,8 @@ public class MultiSecurityFilterChainConfig {
     private List<PreAuthenticationChecker> preAuthenticationCheckers;
     private UserDetailsService customUserDetailService;
 
+    private PersistentTokenRepository persistentTokenRepository;
+
     @Autowired
     public void setCustomUserDetailService(UserDetailsService customUserDetailService) {
         this.customUserDetailService = customUserDetailService;
@@ -63,6 +66,11 @@ public class MultiSecurityFilterChainConfig {
     @Autowired
     public void setPreAuthenticationCheckers(List<PreAuthenticationChecker> preAuthenticationCheckers) {
         this.preAuthenticationCheckers = preAuthenticationCheckers;
+    }
+
+    @Autowired
+    public void setPersistentTokenRepository(PersistentTokenRepository persistentTokenRepository) {
+        this.persistentTokenRepository = persistentTokenRepository;
     }
 
     /**
@@ -146,7 +154,7 @@ public class MultiSecurityFilterChainConfig {
     public AuthenticationManager authenticationManager() {
         return new ProviderManager(List.of(
                 daoAuthenticationProvider(),
-                new JweAuthenticationProvider(customUserDetailService),
+                new JweAuthenticationProvider(customUserDetailService, persistentTokenRepository),
                 new AnonymousAuthenticationProvider("anonymous")));
     }
 

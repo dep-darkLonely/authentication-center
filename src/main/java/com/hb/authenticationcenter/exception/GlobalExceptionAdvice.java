@@ -39,7 +39,7 @@ public class GlobalExceptionAdvice extends ResponseEntityExceptionHandler implem
                 ResponseResult.failed(ERROR_ACCESS_DENIED_ERROR, this.messages.getMessage(ERROR_ACCESS_DENIED_ERROR)));
     }
 
-    @ExceptionHandler(value = RuntimeException.class)
+    @ExceptionHandler(value = Exception.class)
     public ResponseEntity<ResponseResult> otherExceptionHandle() {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(ResponseResult.failed(ERROR_SERVER_INTERNAL_ERROR,

@@ -37,7 +37,7 @@ public class RoleAuthorityEntity {
     /**
      * role authorities
      */
-    private Set<SysAuthorityEntity> authorities;
+    private Set<AuthorityEntity> authorities;
     /**
      * remark
      */
